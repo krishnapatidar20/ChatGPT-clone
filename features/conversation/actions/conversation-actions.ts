@@ -4,6 +4,7 @@ import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { saveChatMessages } from "@/features/ai/actions/chat-store";
+import { Prisma } from "@/lib/generated/prisma/client";
 
 /** Shape of a conversation row returned in the sidebar list. */
 export type ConversationListItem = {
@@ -133,15 +134,15 @@ export async function branchConversation(
 
   // Copy messages
   await prisma.message.createMany({
-    data: copiedMessages.map((m) => ({
-      conversationId: newConversation.id,
-      role: m.role,
-      status: m.status,
-      content: m.content,
-      parts: m.parts,
-      metadata: m.metadata,
-    })),
-  });
+  data: copiedMessages.map((m) => ({
+    conversationId: newConversation.id,
+    role: m.role,
+    status: m.status,
+    content: m.content,
+    parts: m.parts as Prisma.InputJsonValue,
+    metadata: m.metadata as Prisma.InputJsonValue,
+  })),
+});
 
   revalidatePath("/");
   revalidatePath(`/c/${newConversation.id}`);
