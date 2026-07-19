@@ -5,6 +5,8 @@ type Props = {
 };
 
 export function ToolWebSearch({ part }: Props) {
+  const results = part.output?.results ?? [];
+
   return (
     <div className="my-3 rounded-lg border bg-muted/40 p-4">
       <div className="font-medium">
@@ -22,23 +24,27 @@ export function ToolWebSearch({ part }: Props) {
       )}
 
       {part.state === "output-available" && (
-        <div className="mt-4 space-y-2">
-          {part.output.map((item: any, index: number) => (
+        <div className="mt-4 space-y-3">
+          {results.map((item: any, index: number) => (
             <div
               key={index}
-              className="rounded border bg-background p-3"
+              className="rounded-lg border bg-background p-3"
             >
-              <div className="font-medium">
+              <h3 className="font-semibold">
                 {item.title}
-              </div>
+              </h3>
+
+              <p className="mt-2 text-sm text-muted-foreground">
+                {item.content}
+              </p>
 
               <a
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-blue-500 hover:underline"
+                className="mt-2 inline-block text-sm text-blue-500 hover:underline"
               >
-                {item.url}
+                Read more →
               </a>
             </div>
           ))}

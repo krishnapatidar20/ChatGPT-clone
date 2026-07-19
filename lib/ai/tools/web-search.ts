@@ -7,24 +7,41 @@ const client = tavily({
 });
 
 export const webSearchTool = tool({
-  description:
-    "Search the web for recent or factual information. Use this whenever the user's question requires up-to-date information or information outside the model's knowledge.",
+  description: `
+Search the live web for current information.
+
+Use this tool whenever the user asks about:
+
+- latest news
+- current events
+- today's information
+- recent releases
+- live data
+- anything after your knowledge cutoff
+
+Always return the freshest available information.
+`,
 
   inputSchema: z.object({
     query: z.string().describe("The search query"),
   }),
 
   execute: async ({ query }) => {
-    console.log("🔍 Web Search Tool Called:", query);
-    const response = await client.search(query, {
-      maxResults: 5,
-      topic: "general",
-    });
+  console.log("🔍 Web Search Tool Called:", query);
 
-    return response.results.map((item) => ({
+  const response = await client.search(query, {
+    topic: "news",
+    searchDepth: "advanced",
+    maxResults: 5,
+  });
+
+  return {
+    query,
+    results: response.results.map((item) => ({
       title: item.title,
-      url: item.url,
       content: item.content,
-    }));
-  },
+      url: item.url,
+    })),
+  };
+},
 });
