@@ -4,7 +4,7 @@ K-GPT is a modern AI-powered chat application built with **Next.js 16**, **React
 
 ## 🚀 Live Demo
 
-**🌐 Live Application:** https://https://kgpt.netlify.app/
+**🌐 Live Application:** https://kgpt.netlify.app/
 
 
 ## ✨ Features
