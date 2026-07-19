@@ -9,6 +9,8 @@ import {
   PinOffIcon,
   PlusIcon,
   Trash2Icon,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
@@ -232,14 +234,82 @@ function SidebarFooterMenu() {
     <SidebarMenu>
       <SidebarMenuItem>
         <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start"
-          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        >
-          Toggle theme
-        </Button>
+  variant="ghost"
+  size="icon"
+  onClick={() =>
+    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  }
+  className="
+    group
+    relative
+    h-11
+    w-11
+    overflow-hidden
+    rounded-xl
+    border
+    border-amber-500/20
+    bg-gradient-to-br
+    from-zinc-900
+    via-zinc-800
+    to-zinc-900
+    transition-all
+    duration-300
+    hover:scale-105
+    hover:border-amber-400
+    hover:shadow-[0_0_30px_rgba(250,204,21,.4)]
+    active:scale-95
+  "
+>
+  {/* Animated golden shine */}
+  <div
+    className="
+      absolute
+      inset-0
+      bg-gradient-to-r
+      from-transparent
+      via-amber-400/20
+      to-transparent
+      -translate-x-full
+      group-hover:translate-x-full
+      transition-transform
+      duration-700
+    "
+  />
+
+  {/* Sun */}
+  <Sun
+    className="
+      absolute
+      h-5
+      w-5
+      text-amber-400
+      transition-all
+      duration-500
+      dark:scale-0
+      dark:-rotate-180
+      group-hover:rotate-180
+    "
+  />
+
+  {/* Moon */}
+  <Moon
+    className="
+      absolute
+      h-5
+      w-5
+      text-yellow-300
+      scale-0
+      rotate-180
+      transition-all
+      duration-500
+      dark:scale-100
+      dark:rotate-0
+      group-hover:-rotate-180
+    "
+  />
+
+  <span className="sr-only">Toggle theme</span>
+</Button>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <div className="flex items-center gap-2 px-1 py-1.5">

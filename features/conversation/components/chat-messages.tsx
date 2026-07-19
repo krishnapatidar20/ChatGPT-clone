@@ -14,8 +14,10 @@ import {
 } from "@/components/ai-elements/message";
 import { Loader } from "@/components/ai-elements/loader";
 import { ToolPart } from "@/features/ai/components/tool-part";
+import { BranchButton } from "@/features/conversation/components/branch-button";
 
 type ChatMessagesProps = {
+  conversationId: string;
   messages: UIMessage[];
   status: ChatStatus;
 };
@@ -25,6 +27,7 @@ type ChatMessagesProps = {
  * tool execution, and a loading indicator.
  */
 export function ChatMessages({
+  conversationId,
   messages,
   status,
 }: ChatMessagesProps) {
@@ -41,7 +44,7 @@ export function ChatMessages({
             from={message.role}
           >
             <MessageContent>
-              {message.parts.map((part, index) => {
+  {message.parts.map((part, index) => {
     if (part.type === "text") {
       return (
         <MessageResponse key={index}>
@@ -57,7 +60,14 @@ export function ChatMessages({
       />
     );
   })}
-            </MessageContent>
+</MessageContent>
+
+<div className="mt-2 flex justify-end opacity-0 transition-opacity group-hover:opacity-100">
+  <BranchButton
+    conversationId={conversationId}
+    messageId={message.id}
+  />
+</div>
           </Message>
         ))}
 

@@ -3,6 +3,7 @@
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { saveChatMessages } from "@/features/ai/actions/chat-store";
 
 /** Shape of a conversation row returned in the sidebar list. */
 export type ConversationListItem = {
@@ -84,6 +85,68 @@ export async function createConversation(title = "New Chat") {
             title: title.trim() || "New Chat",
         },
     });
+}
+
+export async function branchConversation(
+  conversationId: string,
+  messageId: string
+) {
+  const user = await requireUser();
+
+  // Verify ownership
+  const conversation = await assertOwnsConversation(
+    conversationId,
+    user.id
+  );
+
+  // Load all messages
+  const messages = await prisma.message.findMany({
+    where: {
+      conversationId,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  // Find where to branch
+  const branchIndex = messages.findIndex(
+    (m) => m.id === messageId
+  );
+
+  if (branchIndex === -1) {
+    throw new Error("Message not found");
+  }
+
+  // Keep messages until selected message
+  const copiedMessages = messages.slice(0, branchIndex + 1);
+
+  // Create new conversation
+  const newConversation = await prisma.conversation.create({
+    data: {
+      userId: user.id,
+      title: `${conversation.title} (Branch)`,
+      model: conversation.model,
+      systemPrompt: conversation.systemPrompt,
+    },
+  });
+
+  // Copy messages
+  await prisma.message.createMany({
+    data: copiedMessages.map((m) => ({
+      conversationId: newConversation.id,
+      role: m.role,
+      status: m.status,
+      content: m.content,
+      parts: m.parts,
+      metadata: m.metadata,
+    })),
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/c/${newConversation.id}`);
+
+  return newConversation;
 }
 
 /**

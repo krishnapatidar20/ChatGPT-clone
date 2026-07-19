@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -13,24 +8,24 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  clerkId String @unique
-  email String? @unique
-  firstName String?
-  lastName String?
-  imageURL String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  clerkId    String   @unique
+  email      String?  @unique
+  firstName  String?
+  lastName   String?
+  imageURL   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   conversations Conversation[]
 }
 
-model Conversation{
+model Conversation {
   id            String   @id @default(cuid())
   userId        String
   title         String   @default("New Chat")
-  model         String? // e.g. openai/gpt-4.1 — per-thread model override
-  systemPrompt  String?  @db.Text
+  model         String?
+  systemPrompt  String? @db.Text
   isPinned      Boolean  @default(false)
   isArchived    Boolean  @default(false)
   createdAt     DateTime @default(now())
@@ -53,26 +48,27 @@ enum MessageRole {
 }
 
 enum MessageStatus {
-  PENDING // created before streaming finishes
+  PENDING
   COMPLETE
   ERROR
 }
 
-
 model Message {
-  id   String @id @default(cuid())
+  id             String @id @default(cuid())
+
   conversationId String
-  role MessageRole
-   status         MessageStatus @default(COMPLETE)
-   content        String @db.Text
-   parts          Json?  // 
-   metadata       Json? 
 
-   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  status         MessageStatus @default(COMPLETE)
 
-   createdAt DateTime @default(now())
-   updatedAt DateTime @updatedAt
+  content        String @db.Text
+  parts          Json?
+  metadata       Json?
 
-   @@index([conversationId, createdAt(sort: Desc)])
-   
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId, createdAt(sort: Desc)])
 }
