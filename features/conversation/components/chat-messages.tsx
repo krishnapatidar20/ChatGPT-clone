@@ -1,7 +1,6 @@
 "use client";
 
-import { isTextUIPart, type UIMessage } from "ai";
-import type { ChatStatus } from "ai";
+import type { ChatStatus, UIMessage } from "ai";
 
 import {
   Conversation,
@@ -14,14 +13,7 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import { Loader } from "@/components/ai-elements/loader";
-
-/** Extracts plain text from a `UIMessage` by joining all text parts. */
-function getMessageText(message: UIMessage) {
-  return message.parts
-    .filter(isTextUIPart)
-    .map((part) => part.text)
-    .join("");
-}
+import { ToolPart } from "@/features/ai/components/tool-part";
 
 type ChatMessagesProps = {
   messages: UIMessage[];
@@ -29,32 +21,56 @@ type ChatMessagesProps = {
 };
 
 /**
- * Renders the conversation message list with markdown responses and a loading indicator.
+ * Renders the conversation message list with markdown responses,
+ * tool execution, and a loading indicator.
  */
-export function ChatMessages({ messages, status }: ChatMessagesProps) {
+export function ChatMessages({
+  messages,
+  status,
+}: ChatMessagesProps) {
   const isWaiting =
-    status === "submitted" && messages.at(-1)?.role === "user";
+    status === "submitted" &&
+    messages.at(-1)?.role === "user";
 
   return (
     <Conversation>
       <ConversationContent className="py-8">
         {messages.map((message) => (
-          <Message key={message.id} from={message.role}>
+          <Message
+            key={message.id}
+            from={message.role}
+          >
             <MessageContent>
-              <MessageResponse>{getMessageText(message)}</MessageResponse>
+              {message.parts.map((part, index) => {
+    if (part.type === "text") {
+      return (
+        <MessageResponse key={index}>
+          {part.text}
+        </MessageResponse>
+      );
+    }
+
+    return (
+      <ToolPart
+        key={index}
+        part={part}
+      />
+    );
+  })}
             </MessageContent>
           </Message>
         ))}
 
-        {isWaiting ? (
+        {isWaiting && (
           <Message from="assistant">
             <MessageContent>
               <Loader />
             </MessageContent>
           </Message>
-        ) : null}
+        )}
       </ConversationContent>
 
+      <ConversationScrollButton />
     </Conversation>
   );
 }

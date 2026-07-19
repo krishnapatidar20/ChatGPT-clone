@@ -3,6 +3,7 @@ import { getChatModel } from "@/features/ai/utils/model";
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { webSearchTool } from "@/lib/ai/tools/web-search";
 import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage } from "ai";
 /**
  * POST /api/chat — Streams an AI assistant reply for a conversation.
@@ -46,8 +47,19 @@ export async function POST(req: Request) {
 
     const result = streamText({
         model: getChatModel(conversation.model),
-        system: conversation.systemPrompt ?? "You are kgpt , a helpful assistant",
+        system: conversation.systemPrompt ?? `You are KGPT, a helpful AI assistant.
+
+When a user's question requires current information, recent news, live data, or facts outside your knowledge, use the webSearch tool.
+
+After receiving the search results, write a complete answer in your own words.
+
+Do not simply repeat or dump the search results.
+
+Cite the sources naturally when appropriate.`,
         messages: await convertToModelMessages(messages),
+        tools: {
+            webSearch: webSearchTool,
+              },
     });
 
     result.consumeStream();
